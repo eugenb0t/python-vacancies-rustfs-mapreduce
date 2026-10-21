@@ -24,8 +24,7 @@ def main():
     mr = read("mapreduce_10000.json") or read("mapreduce_1000.json")
     sql = read("duckdb.json")
     audit = read("audit.json")
-    if not mr:
-        raise SystemExit("MapReduce output missing")
+    ingest = read("ingest_verification.json")
     styles = getSampleStyleSheet()
     styles.add(ParagraphStyle(name="TitleRu", parent=styles["Title"], alignment=TA_CENTER, fontName="DejaVu", fontSize=19, leading=23))
     styles.add(ParagraphStyle(name="BodyRu", parent=styles["BodyText"], fontName="DejaVu", fontSize=9.3, leading=13, spaceAfter=6))
@@ -38,10 +37,21 @@ def main():
     doc = SimpleDocTemplate(str(OUT), pagesize=A4, rightMargin=17*mm, leftMargin=17*mm, topMargin=15*mm, bottomMargin=15*mm)
     story = [Paragraph("Анализ Python-вакансий 2024", styles["TitleRu"]),
         Paragraph("RustFS · потоковый MapReduce · DuckDB", styles["BodyRu"]),
-        Paragraph("В файле содержится 10 205 102 записи вакансий и строка заголовка. Исходный CSV размером 24 970 431 974 байта не изменялся; для расчётов в RustFS хранится gzip-представление.", styles["BodyRu"]),
+        Paragraph("В файле содержится 10 205 102 записи вакансий и строка заголовка. Исходный CSV размером 24 970 431 974 байта не изменялся; gzip-объект в RustFS подтверждён полным чтением и SHA-256.", styles["BodyRu"]),
         Paragraph("Вариант и правило выборки", styles["HeadRu"]),
         Paragraph("Вариант: Python. В сегмент включена строка, если название name содержит python без учёта регистра либо отдельный токен python присутствует в списке key_skills, разделённом точкой с запятой. Описание вакансии не анализировалось. Навыки нормализованы в нижний регистр, повторы внутри строки удалены; пары и тройки — неупорядоченные сочетания.", styles["BodyRu"]),
-        Paragraph("Результаты обработки", styles["HeadRu"])]
+        Paragraph("Результаты обработки", styles["HeadRu"]) ]
+    if not mr:
+        story.extend([Paragraph("Статус на момент сборки: подтверждена загрузка и целостность исходного набора, опубликован воспроизводимый код MapReduce и DuckDB, выполнены два unit-теста и тест искусственного отказа mapper. Полный аналитический проход по 10,2 млн строк и сверка двух движков ещё выполняются; численные аналитические выводы здесь намеренно не приводятся.", styles["BodyRu"]),
+            Paragraph("Проверка объекта", styles["HeadRu"])])
+        if ingest:
+            meta = ingest["object"]
+            story.append(Paragraph(f"{meta['uri']} · {meta['bytes']:,} байт · SHA-256 {meta['sha256']} · проверен потоковым чтением целиком.".replace(",", " "), styles["BodyRu"]))
+        story.append(Paragraph("Сегмент и алгоритм", styles["HeadRu"]))
+        story.append(Paragraph("Вариант Python: name содержит Python без учёта регистра либо отдельный токен Python присутствует в key_skills. Описание не анализируется. Mapper считает уникальные навыки строки и их неупорядоченные пары и тройки; reducer объединяет локальные счётчики блоков. Команда полного запуска и независимого SQL-аудита приведена в README репозитория.", styles["BodyRu"]))
+        doc.build(story)
+        print(OUT)
+        return
     rows = [["Показатель", "Результат"], ["Строк CSV", f"{mr['input_rows']:,}".replace(",", " ")],
         ["Python-сегмент", f"{mr['python_vacancies']:,}".replace(",", " ")],
         ["Подсчёт навыков", f"{sum(mr['counts']['1'].values()):,}".replace(",", " ")],
