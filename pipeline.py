@@ -42,7 +42,9 @@ def skills_of(raw: str) -> tuple[str, ...]:
 
 def selected(row: dict[str, str]) -> bool:
     # Variant = Python. Exact skill token OR title substring; description is deliberately excluded.
-    return "python" in (row.get("name") or "").casefold() or "python" in skills_of(row.get("key_skills", ""))
+    if "python" in (row.get("name") or "").casefold():
+        return True
+    return any(token.strip().casefold() == "python" for token in (row.get("key_skills") or "").split(";"))
 
 
 def combos(skills: tuple[str, ...], n: int):

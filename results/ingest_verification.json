@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "source": {
+    "path_at_run_time": "/media/eugene/Data1/vacancies_2024.csv",
+    "bytes": 24970431974,
+    "sha256": "4f8dcf7c3ba8dab89df4f26639424ab89e5f59fd58a44cd5da0b07f80dac6d80",
+    "csv_lines_including_header": 10205103,
+    "vacancy_rows": 10205102
+  },
+  "object": {
+    "uri": "s3://hh-lake/vacancies_2024.csv.gz",
+    "bytes": 8107206336,
+    "sha256": "490b213766869b28648e35bffbcc037a75671077e7922c56aab895d49f3d9ed8",
+    "verification": "entire S3 object streamed and SHA-256 matched"
+  }
+}
