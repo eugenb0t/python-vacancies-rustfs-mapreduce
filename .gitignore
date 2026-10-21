@@ -1,5 +1,6 @@
 results/mapreduce_*.json
 results/duckdb.json
 results/*.tmp
+.env
 __pycache__/
 *.pyc

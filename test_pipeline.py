@@ -15,11 +15,13 @@ class MapperTest(unittest.TestCase):
             {"name": "Backend Developer", "key_skills": "python;SQL; python"},
             {"name": "Java Engineer", "key_skills": "Java"},
         ]
-        n, counts, _ = map_chunk(rows)
+        n, counts, _, hist, contributions = map_chunk(rows)
         self.assertEqual(n, 2)
         self.assertEqual(counts[0], {"linux": 1, "python": 2, "sql": 2})
         self.assertEqual(counts[1], {"linux + python": 1, "linux + sql": 1, "python + sql": 2})
         self.assertEqual(counts[2], {"linux + python + sql": 1})
+        self.assertEqual(hist, {2: 1, 3: 1})
+        self.assertEqual(contributions, [5, 4, 1])
 
     def test_mapper_failure_propagates(self):
         with self.assertRaisesRegex(RuntimeError, "injected mapper failure"):

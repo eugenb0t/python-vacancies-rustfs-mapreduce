@@ -67,23 +67,41 @@ def main():
         tb = Table([["Комбинация", "Вакансий"]] + [[k, f"{v:,}".replace(",", " ")] for k,v in top], colWidths=[135*mm,37*mm], repeatRows=1)
         tb.setStyle(TableStyle([("FONTNAME",(0,0),(-1,-1),"DejaVu"),("BACKGROUND",(0,0),(-1,0),colors.HexColor("#dce7ef")),("GRID",(0,0),(-1,-1),0.25,colors.grey),("FONTSIZE",(0,0),(-1,-1),8),("PADDING",(0,0),(-1,-1),4)]))
         story.append(tb)
-    story.append(Paragraph("Региональный срез", styles["HeadRu"]))
+    story.append(Paragraph("Рост числа сочетаний", styles["HeadRu"]))
+    hist = mr.get("skill_count_histogram", {})
+    avg = mr["python_vacancies"] or 1
+    hist_text = ", ".join(f"{k} навыков — {v:,}".replace(",", " ") for k,v in sorted(hist.items(), key=lambda x:int(x[0])))
+    story.append(Paragraph(f"В сегменте: {sum(mr['counts']['1'].values()):,} одиночных упоминаний, {sum(mr['counts']['2'].values()):,} парных и {sum(mr['counts']['3'].values()):,} тройных сочетаний. Вакансия с k уникальными навыками даёт k, C(k,2) и C(k,3) комбинаций; распределение числа навыков: {hist_text}. Среднее k={sum(int(k)*v for k,v in hist.items())/avg:.2f}.", styles["BodyRu"]))
+    story.append(Paragraph("Региональный срез: три лидирующих региона", styles["HeadRu"]))
+    region_data = sql.get("top_regions", []) if sql else []
+    if not region_data:
+        region_data = mr.get("top_regions", [])
     rr = [["Регион/area", "Вакансий", "Зарплат с RUR", "Медиана, ₽"]]
-    for area in mr.get("top_regions", []):
+    for area in region_data:
         med = area["median_salary_rur"]
         rr.append([area["area"], str(area["vacancies"]), str(area["salary_observations"]), f"{med:,.0f}".replace(",", " ") if med else "н/д"])
     rt = Table(rr, colWidths=[67*mm,35*mm,35*mm,35*mm], repeatRows=1)
     rt.setStyle(TableStyle([("FONTNAME",(0,0),(-1,-1),"DejaVu"),("BACKGROUND",(0,0),(-1,0),colors.HexColor("#17324d")),("TEXTCOLOR",(0,0),(-1,0),colors.white),("GRID",(0,0),(-1,-1),0.3,colors.grey),("FONTSIZE",(0,0),(-1,-1),8),("PADDING",(0,0),(-1,-1),4)]))
     story.append(rt)
+    for area in region_data:
+        story.append(Paragraph(f"{area['area']}: востребованные навыки", styles["BodyRu"]))
+        table_rows = [["Навыки/сочетания", "Вакансий"]]
+        for key in ("top_skills", "top_pairs", "top_triples"):
+            table_rows.extend([[x["combo"], str(x["vacancies"])] for x in area.get(key, [])[:5]])
+        reg_table = Table(table_rows, colWidths=[135*mm,37*mm], repeatRows=1)
+        reg_table.setStyle(TableStyle([("FONTNAME",(0,0),(-1,-1),"DejaVu"),("BACKGROUND",(0,0),(-1,0),colors.HexColor("#dce7ef")),("GRID",(0,0),(-1,-1),0.25,colors.grey),("FONTSIZE",(0,0),(-1,-1),7.5),("PADDING",(0,0),(-1,-1),3)]))
+        story.append(reg_table)
     story.append(Paragraph("Зарплатный эффект навыковых сочетаний", styles["HeadRu"]))
-    story.append(Paragraph("Сравниваются медиана зарплаты вакансий с парой/тройкой навыков и наибольшая медиана среди входящих в сочетание одиночных навыков. Рассматривались только суммы в RUR; диапазон представлен серединой границ, односторонняя сумма — указанной границей. Это описательное сравнение, не причинная оценка. Значения приводятся для 25 наиболее частых пар и 25 троек.", styles["BodyRu"]))
-    if sql and sql.get("salary_impact_top_combinations"):
-        si = [["Сочетание", "N", "Медиана ₽", "К лучшему одиночному навыку"]]
-        for x in sql["salary_impact_top_combinations"][:12]:
-            si.append([x["combo"], str(x["vacancies"]), f"{x['median_salary_rur']:,.0f}".replace(","," ") if x["median_salary_rur"] else "н/д", f"{x['premium_percent']:+.1f}%" if x["premium_percent"] is not None else "н/д"])
-        st = Table(si, colWidths=[75*mm,20*mm,35*mm,42*mm], repeatRows=1)
-        st.setStyle(TableStyle([("FONTNAME",(0,0),(-1,-1),"DejaVu"),("BACKGROUND",(0,0),(-1,0),colors.HexColor("#dce7ef")),("GRID",(0,0),(-1,-1),0.25,colors.grey),("FONTSIZE",(0,0),(-1,-1),7),("PADDING",(0,0),(-1,-1),3)]))
-        story.append(st)
+    story.append(Paragraph("Только валюта RUR; диапазон зарплаты заменён серединой границ, для одностороннего диапазона используется заданная граница. В выборку сочетаний вошли пары/тройки с минимум 30 вакансиями и 20 известными зарплатами. База — медиана наиболее часто встречающегося одиночного навыка из сочетания в Python-сегменте; Δ = (медиана сочетания / медиана базы − 1) × 100%. Это описательная, не причинная оценка.", styles["BodyRu"]))
+    if sql:
+        for label, key in (("Наибольший рост медианы", "top_salary_increases"), ("Наибольшее снижение медианы", "top_salary_decreases")):
+            story.append(Paragraph(label, styles["BodyRu"]))
+            si = [["Сочетание", "N", "Медиана ₽", "База навыка", "Δ"]]
+            for x in sql.get(key, []):
+                si.append([x["combo"], str(x["vacancies"]), f"{x['median_salary_rur']:,.0f}".replace(","," ") if x["median_salary_rur"] else "н/д", x.get("baseline_skill_by_segment_frequency") or "н/д", f"{x['premium_percent']:+.1f}%" if x["premium_percent"] is not None else "н/д"])
+            st = Table(si, colWidths=[57*mm,16*mm,31*mm,48*mm,20*mm], repeatRows=1)
+            st.setStyle(TableStyle([("FONTNAME",(0,0),(-1,-1),"DejaVu"),("BACKGROUND",(0,0),(-1,0),colors.HexColor("#dce7ef")),("GRID",(0,0),(-1,-1),0.25,colors.grey),("FONTSIZE",(0,0),(-1,-1),6.5),("PADDING",(0,0),(-1,-1),3)]))
+            story.append(st)
     story.append(Paragraph("Производительность и контроль", styles["HeadRu"]))
     profiles = []
     for p in sorted(RESULTS.glob("mapreduce_*.json")):
@@ -93,8 +111,15 @@ def main():
         pt = Table([["Строк в блоке", "Время, с", "Пиковая RSS, MiB"]]+profiles, colWidths=[58*mm,58*mm,58*mm])
         pt.setStyle(TableStyle([("FONTNAME",(0,0),(-1,-1),"DejaVu"),("BACKGROUND",(0,0),(-1,0),colors.HexColor("#dce7ef")),("GRID",(0,0),(-1,-1),0.25,colors.grey),("FONTSIZE",(0,0),(-1,-1),8),("PADDING",(0,0),(-1,-1),4)]))
         story.append(pt)
+    if sql:
+        story.append(Paragraph(f"DuckDB: {sql['elapsed_seconds']:.1f} с, пиковая RSS {sql['peak_rss_kib']/1024:.1f} MiB.", styles["BodyRu"]))
     story.append(Paragraph("Тест отказа mapper: искусственная ошибка должна завершать задачу с ошибкой; частичный результат не публикуется. MapReduce и SQL используют один S3 gzip-объект и единый сегмент; аудит сверяет словари одиночных навыков, пар и троек и число вакансий. В качестве оптимизации локальные счётчики блока редуцируются агрегированно, уменьшая количество операций записи в итоговые глобальные счётчики.", styles["BodyRu"]))
     story.append(Paragraph("Ограничения: RustFS использует восемь каталогов на одном физическом NVMe (учебная конфигурация, без отказоустойчивости к потере диска). Зарплата указана только при валюте RUR, пропуски не импутируются. CSV является снимком 2024 года.", styles["BodyRu"]))
+    for img in (ROOT / "evidence" / "rustfs_buckets.png", ROOT / "evidence" / "rustfs_hh_lake_object.png"):
+        if img.exists():
+            story.extend([PageBreak(), Paragraph(f"Скриншот консоли RustFS: {img.stem.replace('_',' ')}", styles["HeadRu"]), Spacer(1,4*mm)])
+            from reportlab.platypus import Image
+            story.append(Image(str(img), width=170*mm, height=95*mm, kind="proportional"))
     doc.build(story)
     print(OUT)
 
