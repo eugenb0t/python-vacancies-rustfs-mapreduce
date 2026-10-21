@@ -1,0 +1,5 @@
+results/mapreduce_*.json
+results/duckdb.json
+results/*.tmp
+__pycache__/
+*.pyc
