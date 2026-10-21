@@ -180,7 +180,7 @@ def duckdb_run():
         key_skills
       FROM read_csv('{uri}', header=true, all_varchar=true, nullstr='')
       WHERE contains(lower(coalesce(name,'')), 'python') OR
-        list_contains(list_transform(string_split(coalesce(key_skills,''), ';'), x -> lower(trim(x))), 'python')""")
+        list_contains(list_transform(string_split(coalesce(key_skills,''), ';'), lambda x : lower(trim(x))), 'python')""")
     selected_count = con.execute("SELECT count(*) FROM chosen").fetchone()[0]
     con.execute("""CREATE TEMP TABLE skill_rows AS
       SELECT DISTINCT c.rid,c.area,c.salary_rur,lower(trim(u.skill)) AS skill

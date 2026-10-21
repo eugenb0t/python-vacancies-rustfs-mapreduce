@@ -25,6 +25,7 @@ def main():
     sql = read("duckdb.json")
     audit = read("audit.json")
     ingest = read("ingest_verification.json")
+    optimization = read("optimization_benchmark.json")
     styles = getSampleStyleSheet()
     styles.add(ParagraphStyle(name="TitleRu", parent=styles["Title"], alignment=TA_CENTER, fontName="DejaVu", fontSize=19, leading=23))
     styles.add(ParagraphStyle(name="BodyRu", parent=styles["BodyText"], fontName="DejaVu", fontSize=9.3, leading=13, spaceAfter=6))
@@ -54,8 +55,8 @@ def main():
         return
     rows = [["Показатель", "Результат"], ["Строк CSV", f"{mr['input_rows']:,}".replace(",", " ")],
         ["Python-сегмент", f"{mr['python_vacancies']:,}".replace(",", " ")],
-        ["Подсчёт навыков", f"{sum(mr['counts']['1'].values()):,}".replace(",", " ")],
-        ["Счётчики пар / троек", f"{len(mr['counts']['2']):,} / {len(mr['counts']['3']):,} уникальных комбинаций"],
+        ["Уникальные навыки / пары / тройки", f"{len(mr['counts']['1']):,} / {len(mr['counts']['2']):,} / {len(mr['counts']['3']):,}".replace(",", " ")],
+        ["Всего упоминаний навыков / пар / троек", " / ".join(f"{sum(mr['counts'][k].values()):,}".replace(",", " ") for k in ("1","2","3"))],
         ["Аудит MapReduce ↔ DuckDB", audit.get("status", "не выполнен") if audit else "не выполнен"]]
     t = Table(rows, colWidths=[68*mm, 104*mm], repeatRows=1)
     t.setStyle(TableStyle([("FONTNAME", (0,0),(-1,-1),"DejaVu"),("BACKGROUND",(0,0),(-1,0),colors.HexColor("#17324d")),("TEXTCOLOR",(0,0),(-1,0),colors.white),("GRID",(0,0),(-1,-1),0.35,colors.HexColor("#9aa7b2")),("ROWBACKGROUNDS",(0,1),(-1,-1),[colors.white,colors.HexColor("#eef3f7")]),("FONTSIZE",(0,0),(-1,-1),8.5),("VALIGN",(0,0),(-1,-1),"TOP"),("PADDING",(0,0),(-1,-1),5)]))
@@ -113,6 +114,16 @@ def main():
         story.append(pt)
     if sql:
         story.append(Paragraph(f"DuckDB: {sql['elapsed_seconds']:.1f} с, пиковая RSS {sql['peak_rss_kib']/1024:.1f} MiB.", styles["BodyRu"]))
+    if optimization:
+        story.append(Paragraph("Бонус: до/после оптимизации предварительного фильтра", styles["HeadRu"]))
+        before,after=optimization["before"]["metrics"],optimization["after"]["metrics"]
+        bt=Table([["Метод", "Медиана 5 запусков, с", "Пик временных аллокаций, байт"],
+            ["До: нормализация set/sort навыков",f"{before['median_seconds']:.4f}",str(before["peak_temporary_bytes"])],
+            ["После: ранний title + прямой токен",f"{after['median_seconds']:.4f}",str(after["peak_temporary_bytes"])],
+            ["Ускорение",f"{optimization['time_improvement_percent']:+.1f}%","выборки совпали"]],colWidths=[76*mm,47*mm,49*mm])
+        bt.setStyle(TableStyle([("FONTNAME",(0,0),(-1,-1),"DejaVu"),("BACKGROUND",(0,0),(-1,0),colors.HexColor("#dce7ef")),("GRID",(0,0),(-1,-1),0.25,colors.grey),("FONTSIZE",(0,0),(-1,-1),7.5),("PADDING",(0,0),(-1,-1),4)]))
+        story.append(bt)
+        story.append(Paragraph(f"Микробенчмарк выполнен на первых {optimization['sample_input_rows']:,} строках того же S3-объекта, по {optimization['repetitions_per_method']} повтора для каждого варианта. Метрика пика — временные Python-аллокации, замеренные tracemalloc; полная пиковая RSS для обработки датасета приведена отдельно выше.".replace(",", " "),styles["BodyRu"]))
     story.append(Paragraph("Тест отказа mapper: искусственная ошибка должна завершать задачу с ошибкой; частичный результат не публикуется. MapReduce и SQL используют один S3 gzip-объект и единый сегмент; аудит сверяет словари одиночных навыков, пар и троек и число вакансий. В качестве оптимизации локальные счётчики блока редуцируются агрегированно, уменьшая количество операций записи в итоговые глобальные счётчики.", styles["BodyRu"]))
     story.append(Paragraph("Ограничения: RustFS использует восемь каталогов на одном физическом NVMe (учебная конфигурация, без отказоустойчивости к потере диска). Зарплата указана только при валюте RUR, пропуски не импутируются. CSV является снимком 2024 года.", styles["BodyRu"]))
     for img in (ROOT / "evidence" / "rustfs_buckets.png", ROOT / "evidence" / "rustfs_hh_lake_object.png"):
