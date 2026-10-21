@@ -1,0 +1,41 @@
+services:
+  rustfs:
+    image: rustfs/rustfs:latest
+    container_name: rustfs-python-vacancies
+    restart: unless-stopped
+    user: "10001:10001"
+    command:
+      - server
+      - /data/disk0
+      - /data/disk1
+      - /data/disk2
+      - /data/disk3
+      - /data/disk4
+      - /data/disk5
+      - /data/disk6
+      - /data/disk7
+    environment:
+      RUSTFS_ACCESS_KEY: ${RUSTFS_ACCESS_KEY:?Set RUSTFS_ACCESS_KEY in .env}
+      RUSTFS_SECRET_KEY: ${RUSTFS_SECRET_KEY:?Set RUSTFS_SECRET_KEY in .env}
+      RUSTFS_UNSAFE_BYPASS_DISK_CHECK: "true"
+      RUSTFS_CONSOLE_ENABLE: "true"
+      RUSTFS_ADDRESS: ":9000"
+      RUSTFS_CONSOLE_ADDRESS: ":9001"
+      RUSTFS_OBS_LOGGER_LEVEL: info
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - ${RUSTFS_DISK_ROOT:?Set RUSTFS_DISK_ROOT}/disk0:/data/disk0
+      - ${RUSTFS_DISK_ROOT:?Set RUSTFS_DISK_ROOT}/disk1:/data/disk1
+      - ${RUSTFS_DISK_ROOT:?Set RUSTFS_DISK_ROOT}/disk2:/data/disk2
+      - ${RUSTFS_DISK_ROOT:?Set RUSTFS_DISK_ROOT}/disk3:/data/disk3
+      - ${RUSTFS_DISK_ROOT:?Set RUSTFS_DISK_ROOT}/disk4:/data/disk4
+      - ${RUSTFS_DISK_ROOT:?Set RUSTFS_DISK_ROOT}/disk5:/data/disk5
+      - ${RUSTFS_DISK_ROOT:?Set RUSTFS_DISK_ROOT}/disk6:/data/disk6
+      - ${RUSTFS_DISK_ROOT:?Set RUSTFS_DISK_ROOT}/disk7:/data/disk7
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:9000/health/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 12

@@ -8,11 +8,15 @@
 
 ## Запуск
 
-Окружение: Python 3, `boto3`, `duckdb`, локально доступный RustFS S3 endpoint; переменные `RUSTFS_ENDPOINT`, `RUSTFS_ACCESS_KEY`, `RUSTFS_SECRET_KEY`, `RUSTFS_BUCKET` можно переопределить. Для загрузки исходника предусмотрен `upload_dataset.py`.
+Окружение: Python 3, Docker Compose, `boto3`, `duckdb`. Скопируйте `.env.example` в `.env`, задайте собственные S3 ключи и абсолютный `RUSTFS_DISK_ROOT`, создайте там `disk0`…`disk7` и назначьте их владельцем UID/GID `10001` перед запуском контейнера. Не публикуйте `.env`. Для загрузки исходника предусмотрен `upload_dataset.py` (при необходимости задайте `RUSTFS_DATASET`).
 
 ```bash
+cp .env.example .env  # затем задайте локальные ключи и каталог хранения
+set -a; source .env; set +a
+mkdir -p "$RUSTFS_DISK_ROOT"/disk{0..7}
+docker run --rm --user 0:0 -v "$RUSTFS_DISK_ROOT:/mnt" alpine sh -c 'chown -R 10001:10001 /mnt/disk0 /mnt/disk1 /mnt/disk2 /mnt/disk3 /mnt/disk4 /mnt/disk5 /mnt/disk6 /mnt/disk7'
+docker compose up -d
 python -m pip install boto3 duckdb
-set -a; source ../.env; set +a
 python upload_dataset.py
 python pipeline.py fail-test
 python pipeline.py profile       # три полных прохода: 1k / 10k / 100k строк на блок

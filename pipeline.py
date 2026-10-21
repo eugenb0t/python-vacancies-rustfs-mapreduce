@@ -308,9 +308,14 @@ def main():
     p.add_argument("--chunk-rows", type=int, default=10000)
     a = p.parse_args()
     if a.command == "mr":
-        print(json.dumps(mr_run(a.chunk_rows), ensure_ascii=False))
+        result = mr_run(a.chunk_rows)
+        print(json.dumps({k:result[k] for k in ("chunk_rows","input_rows","python_vacancies","elapsed_seconds","peak_rss_kib")}
+            | {"unique_counts":{"singles":len(result["counts"]["1"]),"pairs":len(result["counts"]["2"]),"triples":len(result["counts"]["3"])},
+               "total_combinations":result["combination_contribution_totals"],"top_regions":result["top_regions"]},ensure_ascii=False))
     elif a.command == "duckdb":
-        print(json.dumps(duckdb_run(), ensure_ascii=False))
+        result = duckdb_run()
+        print(json.dumps({k:result[k] for k in ("python_vacancies","elapsed_seconds","peak_rss_kib","top_regions","top_salary_increases","top_salary_decreases")}
+            | {"unique_counts":{"singles":len(result["counts"]["1"]),"pairs":len(result["counts"]["2"]),"triples":len(result["counts"]["3"]) }},ensure_ascii=False))
     elif a.command == "audit":
         audit()
     elif a.command == "fail-test":

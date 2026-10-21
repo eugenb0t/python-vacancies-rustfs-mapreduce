@@ -13,9 +13,13 @@ SOURCE = Path(os.getenv("RUSTFS_DATASET", "/media/eugene/Data1/vacancies_2024.cs
 BUCKET = os.getenv("RUSTFS_BUCKET", "hh-lake")
 KEY = "vacancies_2024.csv.gz"
 endpoint = os.getenv("RUSTFS_ENDPOINT", "http://127.0.0.1:9000")
+access = os.getenv("RUSTFS_ACCESS_KEY")
+secret = os.getenv("RUSTFS_SECRET_KEY")
+if not access or not secret:
+    raise SystemExit("Set RUSTFS_ACCESS_KEY and RUSTFS_SECRET_KEY in the environment")
 s3 = boto3.client("s3", endpoint_url=endpoint,
-    aws_access_key_id=os.getenv("RUSTFS_ACCESS_KEY", "de_student"),
-    aws_secret_access_key=os.getenv("RUSTFS_SECRET_KEY", "ROTATED_CREDENTIAL_REVOKED"),
+    aws_access_key_id=access,
+    aws_secret_access_key=secret,
     region_name="us-east-1", config=Config(signature_version="s3v4", s3={"addressing_style": "path"}))
 
 if not SOURCE.is_file():
