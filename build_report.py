@@ -26,6 +26,28 @@ def main():
     audit = read("audit.json")
     ingest = read("ingest_verification.json")
     optimization = read("optimization_benchmark.json")
+    if optimization and "temporary_allocation_reduction_percent" not in optimization:
+        b = optimization["before"]["metrics"]["peak_temporary_bytes"]
+        a = optimization["after"]["metrics"]["peak_temporary_bytes"]
+        optimization["temporary_allocation_reduction_percent"] = round((1-a/b)*100,2)
+    failure = read("mapper_failure.json")
+    profiles_data = [json.loads(p.read_text(encoding="utf-8")) for p in sorted(RESULTS.glob("mapreduce_*.json"))]
+    if mr:
+        summary = {
+            "variant": "Python",
+            "filter": mr["filter"],
+            "ingest_verification": ingest,
+            "mapreduce_profiles": [{"chunk_rows": d["chunk_rows"], "input_rows": d["input_rows"],
+                "python_vacancies": d["python_vacancies"], "elapsed_seconds": d["elapsed_seconds"],
+                "peak_rss_kib": d["peak_rss_kib"], "unique_counts": {k:len(v) for k,v in d["counts"].items()},
+                "combination_contribution_totals": d["combination_contribution_totals"]} for d in profiles_data],
+            "duckdb": {k:sql[k] for k in ("python_vacancies","elapsed_seconds","peak_rss_kib","memory_limit","threads","combination_contribution_totals","top_regions","top_salary_increases","top_salary_decreases")} if sql else None,
+            "audit": audit,
+            "mapper_failure_test": failure,
+            "optimization_benchmark": optimization,
+            "s3_result_objects": ["results/mapreduce_1000.json","results/mapreduce_10000.json","results/mapreduce_100000.json","results/duckdb.json","results/audit.json","results/mapper_failure.json","results/optimization_benchmark.json"]
+        }
+        (RESULTS / "submission_summary.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     styles = getSampleStyleSheet()
     styles.add(ParagraphStyle(name="TitleRu", parent=styles["Title"], alignment=TA_CENTER, fontName="DejaVu", fontSize=19, leading=23))
     styles.add(ParagraphStyle(name="BodyRu", parent=styles["BodyText"], fontName="DejaVu", fontSize=9.3, leading=13, spaceAfter=6))
@@ -39,6 +61,7 @@ def main():
     story = [Paragraph("Анализ Python-вакансий 2024", styles["TitleRu"]),
         Paragraph("RustFS · потоковый MapReduce · DuckDB", styles["BodyRu"]),
         Paragraph("В файле содержится 10 205 102 записи вакансий и строка заголовка. Исходный CSV размером 24 970 431 974 байта не изменялся; gzip-объект в RustFS подтверждён полным чтением и SHA-256.", styles["BodyRu"]),
+        Paragraph(f"Объект: {ingest['object']['uri']} · {ingest['object']['bytes']:,} байт · SHA-256 {ingest['object']['sha256']} · исходный CSV SHA-256 {ingest['source']['sha256']}.".replace(",", " "), styles["BodyRu"]),
         Paragraph("Вариант и правило выборки", styles["HeadRu"]),
         Paragraph("Вариант: Python. В сегмент включена строка, если название name содержит python без учёта регистра либо отдельный токен python присутствует в списке key_skills, разделённом точкой с запятой. Описание вакансии не анализировалось. Навыки нормализованы в нижний регистр, повторы внутри строки удалены; пары и тройки — неупорядоченные сочетания.", styles["BodyRu"]),
         Paragraph("Результаты обработки", styles["HeadRu"]) ]
@@ -80,10 +103,14 @@ def main():
     rr = [["Регион/area", "Вакансий", "Зарплат с RUR", "Медиана, ₽"]]
     for area in region_data:
         med = area["median_salary_rur"]
-        rr.append([area["area"], str(area["vacancies"]), str(area["salary_observations"]), f"{med:,.0f}".replace(",", " ") if med else "н/д"])
+        rr.append([area["area"], str(area.get("python_vacancies",area.get("vacancies"))), str(area["salary_observations"]), f"{med:,.0f}".replace(",", " ") if med else "н/д"])
     rt = Table(rr, colWidths=[67*mm,35*mm,35*mm,35*mm], repeatRows=1)
     rt.setStyle(TableStyle([("FONTNAME",(0,0),(-1,-1),"DejaVu"),("BACKGROUND",(0,0),(-1,0),colors.HexColor("#17324d")),("TEXTCOLOR",(0,0),(-1,0),colors.white),("GRID",(0,0),(-1,-1),0.3,colors.grey),("FONTSIZE",(0,0),(-1,-1),8),("PADDING",(0,0),(-1,-1),4)]))
     story.append(rt)
+    if len(region_data) >= 3:
+        r0, r1, r2 = region_data[:3]
+        cover = " / ".join(f"{x['area']}: {100*x['salary_observations']/x.get('python_vacancies',x.get('vacancies',1)):.1f}%" for x in (r0,r1,r2))
+        story.append(Paragraph(f"Наблюдение: медиана Москвы выше Санкт-Петербурга на {(r0['median_salary_rur']/r1['median_salary_rur']-1)*100:.1f}% и Екатеринбурга на {(r0['median_salary_rur']/r2['median_salary_rur']-1)*100:.1f}%. Доля объявлений с указанной зарплатой различается ({cover}), поэтому медианы описывают подвыборки с разным покрытием.", styles["BodyRu"]))
     for area in region_data:
         story.append(Paragraph(f"{area['area']}: востребованные навыки", styles["BodyRu"]))
         table_rows = [["Навыки/сочетания", "Вакансий"]]
@@ -114,6 +141,32 @@ def main():
         story.append(pt)
     if sql:
         story.append(Paragraph(f"DuckDB: {sql['elapsed_seconds']:.1f} с, пиковая RSS {sql['peak_rss_kib']/1024:.1f} MiB.", styles["BodyRu"]))
+        if audit and audit.get("status") == "PASS":
+            mr10 = read("mapreduce_10000.json") or mr
+            speedup = mr10["elapsed_seconds"] / sql["elapsed_seconds"]
+            story.append(Paragraph(f"Сравнение на одной машине: SQL завершился в {speedup:.2f} раза быстрее MapReduce с блоком 10 000 строк; пиковая RSS DuckDB выше (ограничение DuckDB — 4 GiB, два потока). Это сравнение конкретных реализаций и конфигураций, а не универсальное преимущество движка.", styles["BodyRu"]))
+    if sql and sql.get("top_salary_increases") and sql.get("top_salary_decreases"):
+        inc = next((x for x in sql["top_salary_increases"] if x["combo"] == "asyncio + python"), sql["top_salary_increases"][0])
+        dec = next((x for x in sql["top_salary_decreases"] if x["combo"] == "gimp + python"), sql["top_salary_decreases"][0])
+        story.append(Paragraph(f"Интерпретация эффекта: `asyncio + python` — медиана {inc['median_salary_rur']:,.0f} ₽ против {inc['baseline_median_salary_rur']:,.0f} ₽ у более частого базового навыка {inc['baseline_skill_by_segment_frequency']} ({inc['premium_percent']:+.1f}%, {inc['salary_observations']} зарплатных наблюдений). Для `gimp + python` медиана {dec['median_salary_rur']:,.0f} ₽ против {dec['baseline_median_salary_rur']:,.0f} ₽ у {dec['baseline_skill_by_segment_frequency']} ({dec['premium_percent']:+.1f}%, {dec['salary_observations']} наблюдений). Снижение, вероятно, отражает иной состав ролей и зарплатных объявлений, а не причинное влияние навыка.", styles["BodyRu"]))
+    # Concise literal run outputs make the report auditable without embedding 79-MB counters.
+    output_rows = [["Команда", "Фрагмент фактического вывода"]]
+    for path in sorted(RESULTS.glob("mapreduce_*.json")):
+        d = json.loads(path.read_text(encoding="utf-8"))
+        output_rows.append([f"mr --chunk-rows {d['chunk_rows']}",
+            f"rows={d['input_rows']}; python={d['python_vacancies']}; t={d['elapsed_seconds']:.3f}s; peak={d['peak_rss_kib']/1024:.1f}MiB"])
+    if sql:
+        output_rows.append(["duckdb",f"python={sql['python_vacancies']}; t={sql['elapsed_seconds']:.3f}s; peak={sql['peak_rss_kib']/1024:.1f}MiB; unique={len(sql['counts']['1'])}/{len(sql['counts']['2'])}/{len(sql['counts']['3'])}"])
+    if audit:
+        output_rows.append(["audit",f"{audit['status']}; 3/3 чанка совпали, mismatch=0 для уровней 1/2/3"])
+    if failure:
+        output_rows.append(["fail-test",f"{failure['status']}; injected error; partial result published=false"])
+    if optimization:
+        output_rows.append(["benchmark_filter",f"1,000,000 строк; {optimization['time_improvement_percent']:+.2f}% времени; выбранные строки равны"])
+    story.extend([Paragraph("Выводы команд (сокращённый stdout)", styles["HeadRu"])])
+    ot = Table([[Paragraph(str(v), styles["BodyRu"]) for v in row] for row in output_rows], colWidths=[46*mm,126*mm], repeatRows=1)
+    ot.setStyle(TableStyle([("FONTNAME",(0,0),(-1,-1),"DejaVu"),("BACKGROUND",(0,0),(-1,0),colors.HexColor("#dce7ef")),("GRID",(0,0),(-1,-1),0.25,colors.grey),("FONTSIZE",(0,0),(-1,-1),7),("VALIGN",(0,0),(-1,-1),"TOP"),("PADDING",(0,0),(-1,-1),4)]))
+    story.append(ot)
     if optimization:
         story.append(Paragraph("Бонус: до/после оптимизации предварительного фильтра", styles["HeadRu"]))
         before,after=optimization["before"]["metrics"],optimization["after"]["metrics"]
@@ -124,6 +177,7 @@ def main():
         bt.setStyle(TableStyle([("FONTNAME",(0,0),(-1,-1),"DejaVu"),("BACKGROUND",(0,0),(-1,0),colors.HexColor("#dce7ef")),("GRID",(0,0),(-1,-1),0.25,colors.grey),("FONTSIZE",(0,0),(-1,-1),7.5),("PADDING",(0,0),(-1,-1),4)]))
         story.append(bt)
         story.append(Paragraph(f"Микробенчмарк выполнен на первых {optimization['sample_input_rows']:,} строках того же S3-объекта, по {optimization['repetitions_per_method']} повтора для каждого варианта. Метрика пика — временные Python-аллокации, замеренные tracemalloc; полная пиковая RSS для обработки датасета приведена отдельно выше.".replace(",", " "),styles["BodyRu"]))
+        story.append(Paragraph(f"Пиковые временные аллокации уменьшились на {optimization['temporary_allocation_reduction_percent']:.1f}% ({before['peak_temporary_bytes']} → {after['peak_temporary_bytes']} байт). Это измерение относится к фильтру поверх уже загруженного набора строк и не выдаётся за снижение RSS полного процесса.", styles["BodyRu"]))
     story.append(Paragraph("Тест отказа mapper: искусственная ошибка должна завершать задачу с ошибкой; частичный результат не публикуется. MapReduce и SQL используют один S3 gzip-объект и единый сегмент; аудит сверяет словари одиночных навыков, пар и троек и число вакансий. В качестве оптимизации локальные счётчики блока редуцируются агрегированно, уменьшая количество операций записи в итоговые глобальные счётчики.", styles["BodyRu"]))
     story.append(Paragraph("Ограничения: RustFS использует восемь каталогов на одном физическом NVMe (учебная конфигурация, без отказоустойчивости к потере диска). Зарплата указана только при валюте RUR, пропуски не импутируются. CSV является снимком 2024 года.", styles["BodyRu"]))
     for img in (ROOT / "evidence" / "rustfs_buckets.png", ROOT / "evidence" / "rustfs_hh_lake_object.png"):

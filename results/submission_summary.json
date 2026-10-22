@@ -1,0 +1,858 @@
+{
+  "variant": "Python",
+  "filter": "case-insensitive 'python' substring in name OR exact semicolon-delimited key_skills token 'python'",
+  "ingest_verification": {
+    "status": "PASS",
+    "source": {
+      "path_at_run_time": "/media/eugene/Data1/vacancies_2024.csv",
+      "bytes": 24970431974,
+      "sha256": "4f8dcf7c3ba8dab89df4f26639424ab89e5f59fd58a44cd5da0b07f80dac6d80",
+      "csv_lines_including_header": 10205103,
+      "vacancy_rows": 10205102
+    },
+    "object": {
+      "uri": "s3://hh-lake/vacancies_2024.csv.gz",
+      "bytes": 8107206336,
+      "sha256": "490b213766869b28648e35bffbcc037a75671077e7922c56aab895d49f3d9ed8",
+      "verification": "entire S3 object streamed and SHA-256 matched"
+    }
+  },
+  "mapreduce_profiles": [
+    {
+      "chunk_rows": 1000,
+      "input_rows": 10205102,
+      "python_vacancies": 20033,
+      "elapsed_seconds": 343.804,
+      "peak_rss_kib": 625572,
+      "unique_counts": {
+        "1": 6644,
+        "2": 136352,
+        "3": 1080737
+      },
+      "combination_contribution_totals": {
+        "1": 153910,
+        "2": 827832,
+        "3": 3930552
+      }
+    },
+    {
+      "chunk_rows": 10000,
+      "input_rows": 10205102,
+      "python_vacancies": 20033,
+      "elapsed_seconds": 359.054,
+      "peak_rss_kib": 698036,
+      "unique_counts": {
+        "1": 6644,
+        "2": 136352,
+        "3": 1080737
+      },
+      "combination_contribution_totals": {
+        "1": 153910,
+        "2": 827832,
+        "3": 3930552
+      }
+    },
+    {
+      "chunk_rows": 100000,
+      "input_rows": 10205102,
+      "python_vacancies": 20033,
+      "elapsed_seconds": 351.28,
+      "peak_rss_kib": 1571140,
+      "unique_counts": {
+        "1": 6644,
+        "2": 136352,
+        "3": 1080737
+      },
+      "combination_contribution_totals": {
+        "1": 153910,
+        "2": 827832,
+        "3": 3930552
+      }
+    }
+  ],
+  "duckdb": {
+    "python_vacancies": 20033,
+    "elapsed_seconds": 136.485,
+    "peak_rss_kib": 4444960,
+    "memory_limit": "4GB",
+    "threads": 2,
+    "combination_contribution_totals": {
+      "1": 153910,
+      "2": 827832,
+      "3": 3930552
+    },
+    "top_regions": [
+      {
+        "area": "Москва",
+        "median_salary_rur": 176250.0,
+        "python_vacancies": 10113,
+        "salary_observations": 2405,
+        "top_pairs": [
+          {
+            "combo": "python + sql",
+            "vacancies": 3971
+          },
+          {
+            "combo": "linux + python",
+            "vacancies": 2141
+          },
+          {
+            "combo": "postgresql + python",
+            "vacancies": 1851
+          },
+          {
+            "combo": "docker + python",
+            "vacancies": 1425
+          },
+          {
+            "combo": "git + python",
+            "vacancies": 1386
+          },
+          {
+            "combo": "bash + python",
+            "vacancies": 915
+          },
+          {
+            "combo": "kubernetes + python",
+            "vacancies": 767
+          },
+          {
+            "combo": "python + анализ данных",
+            "vacancies": 728
+          },
+          {
+            "combo": "postgresql + sql",
+            "vacancies": 726
+          },
+          {
+            "combo": "bash + linux",
+            "vacancies": 697
+          }
+        ],
+        "top_skills": [
+          {
+            "combo": "python",
+            "vacancies": 9341
+          },
+          {
+            "combo": "sql",
+            "vacancies": 3986
+          },
+          {
+            "combo": "linux",
+            "vacancies": 2159
+          },
+          {
+            "combo": "postgresql",
+            "vacancies": 1879
+          },
+          {
+            "combo": "docker",
+            "vacancies": 1460
+          },
+          {
+            "combo": "git",
+            "vacancies": 1414
+          },
+          {
+            "combo": "bash",
+            "vacancies": 915
+          },
+          {
+            "combo": "kubernetes",
+            "vacancies": 786
+          },
+          {
+            "combo": "анализ данных",
+            "vacancies": 729
+          },
+          {
+            "combo": "ms sql",
+            "vacancies": 585
+          }
+        ],
+        "top_triples": [
+          {
+            "combo": "postgresql + python + sql",
+            "vacancies": 723
+          },
+          {
+            "combo": "bash + linux + python",
+            "vacancies": 697
+          },
+          {
+            "combo": "docker + linux + python",
+            "vacancies": 669
+          },
+          {
+            "combo": "git + linux + python",
+            "vacancies": 643
+          },
+          {
+            "combo": "python + sql + анализ данных",
+            "vacancies": 575
+          },
+          {
+            "combo": "linux + postgresql + python",
+            "vacancies": 572
+          },
+          {
+            "combo": "docker + postgresql + python",
+            "vacancies": 543
+          },
+          {
+            "combo": "git + python + sql",
+            "vacancies": 534
+          },
+          {
+            "combo": "linux + python + sql",
+            "vacancies": 499
+          },
+          {
+            "combo": "git + postgresql + python",
+            "vacancies": 471
+          }
+        ]
+      },
+      {
+        "area": "Санкт-Петербург",
+        "median_salary_rur": 130000.0,
+        "python_vacancies": 2544,
+        "salary_observations": 803,
+        "top_pairs": [
+          {
+            "combo": "python + sql",
+            "vacancies": 823
+          },
+          {
+            "combo": "linux + python",
+            "vacancies": 640
+          },
+          {
+            "combo": "postgresql + python",
+            "vacancies": 414
+          },
+          {
+            "combo": "git + python",
+            "vacancies": 400
+          },
+          {
+            "combo": "docker + python",
+            "vacancies": 358
+          },
+          {
+            "combo": "bash + python",
+            "vacancies": 302
+          },
+          {
+            "combo": "bash + linux",
+            "vacancies": 226
+          },
+          {
+            "combo": "git + linux",
+            "vacancies": 191
+          },
+          {
+            "combo": "docker + linux",
+            "vacancies": 183
+          },
+          {
+            "combo": "python + анализ данных",
+            "vacancies": 162
+          }
+        ],
+        "top_skills": [
+          {
+            "combo": "python",
+            "vacancies": 2350
+          },
+          {
+            "combo": "sql",
+            "vacancies": 826
+          },
+          {
+            "combo": "linux",
+            "vacancies": 644
+          },
+          {
+            "combo": "postgresql",
+            "vacancies": 417
+          },
+          {
+            "combo": "git",
+            "vacancies": 405
+          },
+          {
+            "combo": "docker",
+            "vacancies": 361
+          },
+          {
+            "combo": "bash",
+            "vacancies": 302
+          },
+          {
+            "combo": "анализ данных",
+            "vacancies": 163
+          },
+          {
+            "combo": "kubernetes",
+            "vacancies": 162
+          },
+          {
+            "combo": "ansible",
+            "vacancies": 146
+          }
+        ],
+        "top_triples": [
+          {
+            "combo": "bash + linux + python",
+            "vacancies": 226
+          },
+          {
+            "combo": "git + linux + python",
+            "vacancies": 189
+          },
+          {
+            "combo": "docker + linux + python",
+            "vacancies": 180
+          },
+          {
+            "combo": "git + postgresql + python",
+            "vacancies": 143
+          },
+          {
+            "combo": "postgresql + python + sql",
+            "vacancies": 140
+          },
+          {
+            "combo": "docker + git + python",
+            "vacancies": 138
+          },
+          {
+            "combo": "linux + python + sql",
+            "vacancies": 136
+          },
+          {
+            "combo": "linux + postgresql + python",
+            "vacancies": 133
+          },
+          {
+            "combo": "python + sql + анализ данных",
+            "vacancies": 123
+          },
+          {
+            "combo": "docker + postgresql + python",
+            "vacancies": 121
+          }
+        ]
+      },
+      {
+        "area": "Екатеринбург",
+        "median_salary_rur": 100000.0,
+        "python_vacancies": 694,
+        "salary_observations": 254,
+        "top_pairs": [
+          {
+            "combo": "python + sql",
+            "vacancies": 218
+          },
+          {
+            "combo": "linux + python",
+            "vacancies": 176
+          },
+          {
+            "combo": "postgresql + python",
+            "vacancies": 139
+          },
+          {
+            "combo": "git + python",
+            "vacancies": 133
+          },
+          {
+            "combo": "docker + python",
+            "vacancies": 105
+          },
+          {
+            "combo": "bash + python",
+            "vacancies": 78
+          },
+          {
+            "combo": "c++ + python",
+            "vacancies": 64
+          },
+          {
+            "combo": "git + linux",
+            "vacancies": 59
+          },
+          {
+            "combo": "java + python",
+            "vacancies": 59
+          },
+          {
+            "combo": "bash + linux",
+            "vacancies": 57
+          }
+        ],
+        "top_skills": [
+          {
+            "combo": "python",
+            "vacancies": 642
+          },
+          {
+            "combo": "sql",
+            "vacancies": 219
+          },
+          {
+            "combo": "linux",
+            "vacancies": 178
+          },
+          {
+            "combo": "postgresql",
+            "vacancies": 141
+          },
+          {
+            "combo": "git",
+            "vacancies": 137
+          },
+          {
+            "combo": "docker",
+            "vacancies": 105
+          },
+          {
+            "combo": "bash",
+            "vacancies": 78
+          },
+          {
+            "combo": "c++",
+            "vacancies": 64
+          },
+          {
+            "combo": "java",
+            "vacancies": 59
+          },
+          {
+            "combo": "базы данных",
+            "vacancies": 57
+          }
+        ],
+        "top_triples": [
+          {
+            "combo": "bash + linux + python",
+            "vacancies": 57
+          },
+          {
+            "combo": "git + linux + python",
+            "vacancies": 57
+          },
+          {
+            "combo": "docker + linux + python",
+            "vacancies": 53
+          },
+          {
+            "combo": "git + postgresql + python",
+            "vacancies": 49
+          },
+          {
+            "combo": "postgresql + python + sql",
+            "vacancies": 46
+          },
+          {
+            "combo": "docker + git + python",
+            "vacancies": 45
+          },
+          {
+            "combo": "python + sql + базы данных",
+            "vacancies": 45
+          },
+          {
+            "combo": "python + sql + анализ данных",
+            "vacancies": 43
+          },
+          {
+            "combo": "docker + postgresql + python",
+            "vacancies": 41
+          },
+          {
+            "combo": "linux + postgresql + python",
+            "vacancies": 41
+          }
+        ]
+      }
+    ],
+    "top_salary_increases": [
+      {
+        "baseline_median_salary_rur": 80000.0,
+        "baseline_skill_by_segment_frequency": "javascript",
+        "baseline_skill_vacancies": 1423,
+        "combo": "golang + javascript",
+        "level": 2,
+        "median_salary_rur": 337500.0,
+        "premium_percent": 321.88,
+        "salary_observations": 31,
+        "vacancies": 45
+      },
+      {
+        "baseline_median_salary_rur": 55000.0,
+        "baseline_skill_by_segment_frequency": "c#",
+        "baseline_skill_vacancies": 724,
+        "combo": ".net framework + c#",
+        "level": 2,
+        "median_salary_rur": 225000.0,
+        "premium_percent": 309.09,
+        "salary_observations": 30,
+        "vacancies": 49
+      },
+      {
+        "baseline_median_salary_rur": 120000.0,
+        "baseline_skill_by_segment_frequency": "python",
+        "baseline_skill_vacancies": 18358,
+        "combo": "mathcad + python",
+        "level": 2,
+        "median_salary_rur": 402500.0,
+        "premium_percent": 235.42,
+        "salary_observations": 20,
+        "vacancies": 36
+      },
+      {
+        "baseline_median_salary_rur": 107500.0,
+        "baseline_skill_by_segment_frequency": "big data",
+        "baseline_skill_vacancies": 550,
+        "combo": "big data + pandas",
+        "level": 2,
+        "median_salary_rur": 343750.0,
+        "premium_percent": 219.77,
+        "salary_observations": 20,
+        "vacancies": 40
+      },
+      {
+        "baseline_median_salary_rur": 120000.0,
+        "baseline_skill_by_segment_frequency": "python",
+        "baseline_skill_vacancies": 18358,
+        "combo": "asyncio + python + redis",
+        "level": 3,
+        "median_salary_rur": 375000.0,
+        "premium_percent": 212.5,
+        "salary_observations": 25,
+        "vacancies": 42
+      },
+      {
+        "baseline_median_salary_rur": 120000.0,
+        "baseline_skill_by_segment_frequency": "python",
+        "baseline_skill_vacancies": 18358,
+        "combo": "python + teamleading",
+        "level": 2,
+        "median_salary_rur": 357500.0,
+        "premium_percent": 197.92,
+        "salary_observations": 20,
+        "vacancies": 73
+      },
+      {
+        "baseline_median_salary_rur": 120000.0,
+        "baseline_skill_by_segment_frequency": "python",
+        "baseline_skill_vacancies": 18358,
+        "combo": "asyncio + postgresql + python",
+        "level": 3,
+        "median_salary_rur": 350000.0,
+        "premium_percent": 191.67,
+        "salary_observations": 43,
+        "vacancies": 76
+      },
+      {
+        "baseline_median_salary_rur": 120000.0,
+        "baseline_skill_by_segment_frequency": "python",
+        "baseline_skill_vacancies": 18358,
+        "combo": "python + руководство командой разработчиков",
+        "level": 2,
+        "median_salary_rur": 350000.0,
+        "premium_percent": 191.67,
+        "salary_observations": 25,
+        "vacancies": 49
+      },
+      {
+        "baseline_median_salary_rur": 120000.0,
+        "baseline_skill_by_segment_frequency": "python",
+        "baseline_skill_vacancies": 18358,
+        "combo": "aiohttp + asyncio + python",
+        "level": 3,
+        "median_salary_rur": 350000.0,
+        "premium_percent": 191.67,
+        "salary_observations": 21,
+        "vacancies": 39
+      },
+      {
+        "baseline_median_salary_rur": 120000.0,
+        "baseline_skill_by_segment_frequency": "python",
+        "baseline_skill_vacancies": 18358,
+        "combo": "asyncio + python",
+        "level": 2,
+        "median_salary_rur": 345000.0,
+        "premium_percent": 187.5,
+        "salary_observations": 60,
+        "vacancies": 154
+      }
+    ],
+    "top_salary_decreases": [
+      {
+        "baseline_median_salary_rur": 132720.0,
+        "baseline_skill_by_segment_frequency": "sql",
+        "baseline_skill_vacancies": 7137,
+        "combo": "css + mysql + sql",
+        "level": 3,
+        "median_salary_rur": 35000.0,
+        "premium_percent": -73.63,
+        "salary_observations": 34,
+        "vacancies": 42
+      },
+      {
+        "baseline_median_salary_rur": 132720.0,
+        "baseline_skill_by_segment_frequency": "sql",
+        "baseline_skill_vacancies": 7137,
+        "combo": "adobe photoshop + sql",
+        "level": 2,
+        "median_salary_rur": 35000.0,
+        "premium_percent": -73.63,
+        "salary_observations": 29,
+        "vacancies": 34
+      },
+      {
+        "baseline_median_salary_rur": 132720.0,
+        "baseline_skill_by_segment_frequency": "sql",
+        "baseline_skill_vacancies": 7137,
+        "combo": "android + java + sql",
+        "level": 3,
+        "median_salary_rur": 35000.0,
+        "premium_percent": -73.63,
+        "salary_observations": 24,
+        "vacancies": 33
+      },
+      {
+        "baseline_median_salary_rur": 132720.0,
+        "baseline_skill_by_segment_frequency": "sql",
+        "baseline_skill_vacancies": 7137,
+        "combo": "sql + грамотность",
+        "level": 2,
+        "median_salary_rur": 35000.0,
+        "premium_percent": -73.63,
+        "salary_observations": 25,
+        "vacancies": 30
+      },
+      {
+        "baseline_median_salary_rur": 132720.0,
+        "baseline_skill_by_segment_frequency": "sql",
+        "baseline_skill_vacancies": 7137,
+        "combo": "javascript + sql + unity",
+        "level": 3,
+        "median_salary_rur": 37500.0,
+        "premium_percent": -71.75,
+        "salary_observations": 30,
+        "vacancies": 35
+      },
+      {
+        "baseline_median_salary_rur": 120000.0,
+        "baseline_skill_by_segment_frequency": "python",
+        "baseline_skill_vacancies": 18358,
+        "combo": "gimp + python",
+        "level": 2,
+        "median_salary_rur": 35000.0,
+        "premium_percent": -70.83,
+        "salary_observations": 61,
+        "vacancies": 76
+      },
+      {
+        "baseline_median_salary_rur": 120000.0,
+        "baseline_skill_by_segment_frequency": "python",
+        "baseline_skill_vacancies": 18358,
+        "combo": "gimp + python + робототехника",
+        "level": 3,
+        "median_salary_rur": 35000.0,
+        "premium_percent": -70.83,
+        "salary_observations": 47,
+        "vacancies": 58
+      },
+      {
+        "baseline_median_salary_rur": 120000.0,
+        "baseline_skill_by_segment_frequency": "python",
+        "baseline_skill_vacancies": 18358,
+        "combo": "gimp + python + unity",
+        "level": 3,
+        "median_salary_rur": 35000.0,
+        "premium_percent": -70.83,
+        "salary_observations": 47,
+        "vacancies": 58
+      },
+      {
+        "baseline_median_salary_rur": 120000.0,
+        "baseline_skill_by_segment_frequency": "python",
+        "baseline_skill_vacancies": 18358,
+        "combo": "adobe photoshop + python + робототехника",
+        "level": 3,
+        "median_salary_rur": 35000.0,
+        "premium_percent": -70.83,
+        "salary_observations": 42,
+        "vacancies": 52
+      },
+      {
+        "baseline_median_salary_rur": 120000.0,
+        "baseline_skill_by_segment_frequency": "python",
+        "baseline_skill_vacancies": 18358,
+        "combo": "c++ + gimp + python",
+        "level": 3,
+        "median_salary_rur": 35000.0,
+        "premium_percent": -70.83,
+        "salary_observations": 43,
+        "vacancies": 50
+      }
+    ]
+  },
+  "audit": {
+    "combination_contribution_totals_equal": true,
+    "python_vacancies_equal": true,
+    "runs": [
+      {
+        "chunk_rows": 1000,
+        "combination_contributions_equal": true,
+        "equal": true,
+        "levels": {
+          "1": {
+            "equal": true,
+            "examples": {},
+            "mismatch_count": 0
+          },
+          "2": {
+            "equal": true,
+            "examples": {},
+            "mismatch_count": 0
+          },
+          "3": {
+            "equal": true,
+            "examples": {},
+            "mismatch_count": 0
+          }
+        },
+        "python_vacancies_equal": true,
+        "skill_histogram_equal": true,
+        "top_region_skill_pair_triple_equal": true,
+        "top_region_summary_equal": true
+      },
+      {
+        "chunk_rows": 10000,
+        "combination_contributions_equal": true,
+        "equal": true,
+        "levels": {
+          "1": {
+            "equal": true,
+            "examples": {},
+            "mismatch_count": 0
+          },
+          "2": {
+            "equal": true,
+            "examples": {},
+            "mismatch_count": 0
+          },
+          "3": {
+            "equal": true,
+            "examples": {},
+            "mismatch_count": 0
+          }
+        },
+        "python_vacancies_equal": true,
+        "skill_histogram_equal": true,
+        "top_region_skill_pair_triple_equal": true,
+        "top_region_summary_equal": true
+      },
+      {
+        "chunk_rows": 100000,
+        "combination_contributions_equal": true,
+        "equal": true,
+        "levels": {
+          "1": {
+            "equal": true,
+            "examples": {},
+            "mismatch_count": 0
+          },
+          "2": {
+            "equal": true,
+            "examples": {},
+            "mismatch_count": 0
+          },
+          "3": {
+            "equal": true,
+            "examples": {},
+            "mismatch_count": 0
+          }
+        },
+        "python_vacancies_equal": true,
+        "skill_histogram_equal": true,
+        "top_region_skill_pair_triple_equal": true,
+        "top_region_summary_equal": true
+      }
+    ],
+    "status": "PASS"
+  },
+  "mapper_failure_test": {
+    "expected_failure": "injected mapper failure at input row 1",
+    "first_chunk_rows_read": 10000,
+    "published_result": false,
+    "source": "s3://hh-lake/vacancies_2024.csv.gz",
+    "status": "PASS"
+  },
+  "optimization_benchmark": {
+    "source": "s3://hh-lake/vacancies_2024.csv.gz",
+    "sample_input_rows": 1000000,
+    "repetitions_per_method": 5,
+    "before": {
+      "method": "title substring or eager normalization/set/sort of every key_skills value",
+      "metrics": {
+        "runs_seconds": [
+          1.910359592999157,
+          1.9544438470002206,
+          1.9230862820004404,
+          1.9768029599981674,
+          1.9960096180002438
+        ],
+        "median_seconds": 1.9544438470002206,
+        "peak_temporary_bytes": 11166,
+        "selected_per_run": [
+          2328,
+          2328,
+          2328,
+          2328,
+          2328
+        ]
+      }
+    },
+    "after": {
+      "method": "early title check, then direct exact-token scan without per-row set/sort",
+      "metrics": {
+        "runs_seconds": [
+          1.578628494997247,
+          1.559616308000841,
+          1.5982180579994747,
+          1.5709962159999122,
+          1.5909294489974855
+        ],
+        "median_seconds": 1.578628494997247,
+        "peak_temporary_bytes": 6356,
+        "selected_per_run": [
+          2328,
+          2328,
+          2328,
+          2328,
+          2328
+        ]
+      }
+    },
+    "selected_rows_equal": true,
+    "time_improvement_percent": 23.81,
+    "temporary_allocation_reduction_percent": 43.08
+  },
+  "s3_result_objects": [
+    "results/mapreduce_1000.json",
+    "results/mapreduce_10000.json",
+    "results/mapreduce_100000.json",
+    "results/duckdb.json",
+    "results/audit.json",
+    "results/mapper_failure.json",
+    "results/optimization_benchmark.json"
+  ]
+}

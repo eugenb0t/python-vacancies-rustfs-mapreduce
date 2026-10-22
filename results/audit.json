@@ -1,0 +1,85 @@
+{
+  "combination_contribution_totals_equal": true,
+  "python_vacancies_equal": true,
+  "runs": [
+    {
+      "chunk_rows": 1000,
+      "combination_contributions_equal": true,
+      "equal": true,
+      "levels": {
+        "1": {
+          "equal": true,
+          "examples": {},
+          "mismatch_count": 0
+        },
+        "2": {
+          "equal": true,
+          "examples": {},
+          "mismatch_count": 0
+        },
+        "3": {
+          "equal": true,
+          "examples": {},
+          "mismatch_count": 0
+        }
+      },
+      "python_vacancies_equal": true,
+      "skill_histogram_equal": true,
+      "top_region_skill_pair_triple_equal": true,
+      "top_region_summary_equal": true
+    },
+    {
+      "chunk_rows": 10000,
+      "combination_contributions_equal": true,
+      "equal": true,
+      "levels": {
+        "1": {
+          "equal": true,
+          "examples": {},
+          "mismatch_count": 0
+        },
+        "2": {
+          "equal": true,
+          "examples": {},
+          "mismatch_count": 0
+        },
+        "3": {
+          "equal": true,
+          "examples": {},
+          "mismatch_count": 0
+        }
+      },
+      "python_vacancies_equal": true,
+      "skill_histogram_equal": true,
+      "top_region_skill_pair_triple_equal": true,
+      "top_region_summary_equal": true
+    },
+    {
+      "chunk_rows": 100000,
+      "combination_contributions_equal": true,
+      "equal": true,
+      "levels": {
+        "1": {
+          "equal": true,
+          "examples": {},
+          "mismatch_count": 0
+        },
+        "2": {
+          "equal": true,
+          "examples": {},
+          "mismatch_count": 0
+        },
+        "3": {
+          "equal": true,
+          "examples": {},
+          "mismatch_count": 0
+        }
+      },
+      "python_vacancies_equal": true,
+      "skill_histogram_equal": true,
+      "top_region_skill_pair_triple_equal": true,
+      "top_region_summary_equal": true
+    }
+  ],
+  "status": "PASS"
+}

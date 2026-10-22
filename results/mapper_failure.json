@@ -1,0 +1,7 @@
+{
+  "expected_failure": "injected mapper failure at input row 1",
+  "first_chunk_rows_read": 10000,
+  "published_result": false,
+  "source": "s3://hh-lake/vacancies_2024.csv.gz",
+  "status": "PASS"
+}

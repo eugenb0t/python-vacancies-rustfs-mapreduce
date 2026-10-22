@@ -53,7 +53,8 @@ def main():
         "before":{"method":"title substring or eager normalization/set/sort of every key_skills value","metrics":before},
         "after":{"method":"early title check, then direct exact-token scan without per-row set/sort","metrics":after},
         "selected_rows_equal":True,
-        "time_improvement_percent":round((before["median_seconds"]/after["median_seconds"]-1)*100,2)}
+        "time_improvement_percent":round((before["median_seconds"]/after["median_seconds"]-1)*100,2),
+        "temporary_allocation_reduction_percent":round((1-after["peak_temporary_bytes"]/before["peak_temporary_bytes"])*100,2)}
     p=OUT/"optimization_benchmark.json"
     p.write_text(json.dumps(result,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     s3client().put_object(Bucket=BUCKET,Key="results/optimization_benchmark.json",

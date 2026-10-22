@@ -1,0 +1,49 @@
+{
+  "source": "s3://hh-lake/vacancies_2024.csv.gz",
+  "sample_input_rows": 1000000,
+  "repetitions_per_method": 5,
+  "before": {
+    "method": "title substring or eager normalization/set/sort of every key_skills value",
+    "metrics": {
+      "runs_seconds": [
+        1.910359592999157,
+        1.9544438470002206,
+        1.9230862820004404,
+        1.9768029599981674,
+        1.9960096180002438
+      ],
+      "median_seconds": 1.9544438470002206,
+      "peak_temporary_bytes": 11166,
+      "selected_per_run": [
+        2328,
+        2328,
+        2328,
+        2328,
+        2328
+      ]
+    }
+  },
+  "after": {
+    "method": "early title check, then direct exact-token scan without per-row set/sort",
+    "metrics": {
+      "runs_seconds": [
+        1.578628494997247,
+        1.559616308000841,
+        1.5982180579994747,
+        1.5709962159999122,
+        1.5909294489974855
+      ],
+      "median_seconds": 1.578628494997247,
+      "peak_temporary_bytes": 6356,
+      "selected_per_run": [
+        2328,
+        2328,
+        2328,
+        2328,
+        2328
+      ]
+    }
+  },
+  "selected_rows_equal": true,
+  "time_improvement_percent": 23.81
+}

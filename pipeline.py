@@ -157,6 +157,13 @@ def duckdb_run():
     import duckdb
     started = time.perf_counter()
     con = duckdb.connect()
+    # Bound DuckDB's working set and allow larger joins to spill to the data volume.
+    # This keeps the SQL comparison reproducible on a workstation with limited RAM.
+    temp_dir = Path(os.getenv("DUCKDB_TEMP_DIRECTORY", str(OUT / "duckdb_tmp")))
+    temp_dir.mkdir(parents=True, exist_ok=True)
+    con.execute("SET memory_limit='4GB'")
+    con.execute("SET threads=2")
+    con.execute(f"SET temp_directory='{str(temp_dir).replace(chr(39), chr(39)*2)}'")
     con.execute("INSTALL httpfs; LOAD httpfs")
     access = os.getenv("RUSTFS_ACCESS_KEY", "").replace("'", "''")
     secret = os.getenv("RUSTFS_SECRET_KEY", "").replace("'", "''")
@@ -240,7 +247,8 @@ def duckdb_run():
         "counts": counts, "single_skill_salary_baselines":singles,
         "salary_impact_candidates":impact,"top_salary_increases":ups,"top_salary_decreases":downs,
         "top_regions":regions,"elapsed_seconds":round(time.perf_counter()-started,3),
-        "peak_rss_kib":resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,"source":uri}
+        "peak_rss_kib":resource.getrusage(resource.RUSAGE_SELF).ru_maxrss,
+        "memory_limit":"4GB","threads":2,"source":uri}
     emit_json(OUT / "duckdb.json", result)
     s3client().put_object(Bucket=BUCKET, Key="results/duckdb.json",
         Body=json.dumps(result, ensure_ascii=False).encode(), ContentType="application/json")
@@ -271,10 +279,19 @@ def audit():
         sql_regions = {x["area"]:(x["python_vacancies"],x["salary_observations"],round(x["median_salary_rur"],2) if x["median_salary_rur"] is not None else None) for x in sql.get("top_regions",[])}
         mr_regions = {x["area"]:(x["vacancies"],x["salary_observations"],x["median_salary_rur"]) for x in mr.get("top_regions",[])}
         regions_equal = mr_regions == sql_regions
-        run_equal = run_equal and regions_equal
+        sql_region_details = {x["area"]:x for x in sql.get("top_regions",[])}
+        regional_breakdowns_equal = True
+        for region in mr.get("top_regions",[]):
+            other = sql_region_details.get(region["area"],{})
+            for field in ("top_skills","top_pairs","top_triples"):
+                left = {(x["combo"],x["vacancies"]) for x in region[field]}
+                right = {(x["combo"],x["vacancies"]) for x in other.get(field,[])}
+                regional_breakdowns_equal = regional_breakdowns_equal and left == right
+        run_equal = run_equal and regions_equal and regional_breakdowns_equal
         report["runs"].append({"chunk_rows": mr["chunk_rows"], "equal": run_equal,
             "python_vacancies_equal": vacancy_equal,"skill_histogram_equal":histogram_equal,
-            "combination_contributions_equal":contribution_equal,"top_region_summary_equal":regions_equal,"levels": diff})
+            "combination_contributions_equal":contribution_equal,"top_region_summary_equal":regions_equal,
+            "top_region_skill_pair_triple_equal":regional_breakdowns_equal,"levels": diff})
         report["status"] = "PASS" if report["status"] == "PASS" and run_equal else "FAIL"
     if not report["python_vacancies_equal"]:
         report["status"] = "FAIL"
@@ -296,8 +313,12 @@ def fail_test():
         after = {p.name for p in OUT.glob("*.json")}
         if after != before:
             raise RuntimeError("failure test wrote a partial local result")
-        print(json.dumps({"status": "PASS", "expected_failure": str(exc), "published_result": False,
-            "source": f"s3://{BUCKET}/{KEY}", "first_chunk_rows_read": 10000}, ensure_ascii=False))
+        result = {"status": "PASS", "expected_failure": str(exc), "published_result": False,
+            "source": f"s3://{BUCKET}/{KEY}", "first_chunk_rows_read": 10000}
+        emit_json(OUT / "mapper_failure.json", result)
+        s3client().put_object(Bucket=BUCKET, Key="results/mapper_failure.json",
+            Body=json.dumps(result, ensure_ascii=False).encode(), ContentType="application/json")
+        print(json.dumps(result, ensure_ascii=False))
         return
     raise SystemExit("FAIL: injected mapper failure was not observed")
 
