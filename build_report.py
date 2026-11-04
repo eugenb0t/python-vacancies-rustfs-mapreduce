@@ -26,6 +26,7 @@ def main():
     audit = read("audit.json")
     ingest = read("ingest_verification.json")
     optimization = read("optimization_benchmark.json")
+    integrity = read("s3_integrity_manifest.json")
     if optimization and "temporary_allocation_reduction_percent" not in optimization:
         b = optimization["before"]["metrics"]["peak_temporary_bytes"]
         a = optimization["after"]["metrics"]["peak_temporary_bytes"]
@@ -45,6 +46,7 @@ def main():
             "audit": audit,
             "mapper_failure_test": failure,
             "optimization_benchmark": optimization,
+            "s3_integrity_manifest": integrity,
             "s3_result_objects": ["results/mapreduce_1000.json","results/mapreduce_10000.json","results/mapreduce_100000.json","results/duckdb.json","results/audit.json","results/mapper_failure.json","results/optimization_benchmark.json"]
         }
         (RESULTS / "submission_summary.json").write_text(json.dumps(summary,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
@@ -181,6 +183,8 @@ def main():
         story.append(Paragraph(f"Микробенчмарк выполнен на первых {optimization['sample_input_rows']:,} строках того же S3-объекта, по {optimization['repetitions_per_method']} повтора для каждого варианта. Метрика пика — временные Python-аллокации, замеренные tracemalloc; полная пиковая RSS для обработки датасета приведена отдельно выше.".replace(",", " "),styles["BodyRu"]))
         story.append(Paragraph(f"Пиковые временные аллокации уменьшились на {optimization['temporary_allocation_reduction_percent']:.1f}% ({before['peak_temporary_bytes']} → {after['peak_temporary_bytes']} байт). Это измерение относится к фильтру поверх уже загруженного набора строк и не выдаётся за снижение RSS полного процесса.", styles["BodyRu"]))
     story.append(Paragraph("Тест отказа mapper: искусственная ошибка должна завершать задачу с ошибкой; частичный результат не публикуется. MapReduce и SQL используют один S3 gzip-объект и единый сегмент; аудит сверяет словари одиночных навыков, пар и троек и число вакансий. В качестве оптимизации локальные счётчики блока редуцируются агрегированно, уменьшая количество операций записи в итоговые глобальные счётчики.", styles["BodyRu"]))
+    if integrity:
+        story.append(Paragraph(f"Read-back проверка RustFS: {integrity['status']} для {len(integrity['objects'])} объектов — исходного gzip и семи файлов результатов. SHA-256 каждого объекта, прочитанного из S3, совпал с контрольным файлом/хешем источника; полный манифест опубликован в `results/s3_integrity_manifest.json`.", styles["BodyRu"]))
     story.append(Paragraph("Ограничения: RustFS использует восемь каталогов на одном физическом NVMe (учебная конфигурация, без отказоустойчивости к потере диска). Зарплата указана только при валюте RUR, пропуски не импутируются. CSV является снимком 2024 года.", styles["BodyRu"]))
     screenshots = [ROOT / "evidence" / name for name in (
         "rustfs_buckets.png", "rustfs_hh_lake_object.png", "rustfs_results_objects.png")]

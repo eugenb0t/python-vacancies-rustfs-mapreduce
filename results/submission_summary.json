@@ -846,6 +846,68 @@
     "temporary_allocation_reduction_percent": 43.08,
     "time_improvement_percent": 23.37
   },
+  "s3_integrity_manifest": {
+    "bucket": "hh-lake",
+    "status": "PASS",
+    "objects": [
+      {
+        "key": "vacancies_2024.csv.gz",
+        "bytes": 8107206336,
+        "sha256": "490b213766869b28648e35bffbcc037a75671077e7922c56aab895d49f3d9ed8",
+        "expected_sha256": "490b213766869b28648e35bffbcc037a75671077e7922c56aab895d49f3d9ed8",
+        "matches": true
+      },
+      {
+        "key": "results/mapreduce_1000.json",
+        "bytes": 82196733,
+        "sha256": "81086177034f664a2accd61fa513cf93b323983a3b83fcb8eca1596e5ab6a4c8",
+        "expected_sha256": "81086177034f664a2accd61fa513cf93b323983a3b83fcb8eca1596e5ab6a4c8",
+        "matches": true
+      },
+      {
+        "key": "results/mapreduce_10000.json",
+        "bytes": 82196734,
+        "sha256": "dcf8234066b094ac2ab394e174beaf794b5b087a0f46b75102a69d9dbae9cdf5",
+        "expected_sha256": "dcf8234066b094ac2ab394e174beaf794b5b087a0f46b75102a69d9dbae9cdf5",
+        "matches": true
+      },
+      {
+        "key": "results/mapreduce_100000.json",
+        "bytes": 82196736,
+        "sha256": "03da4301354ba26ff6f194582aa7d7af77a7cef90007e5319fd28916518c3d9f",
+        "expected_sha256": "03da4301354ba26ff6f194582aa7d7af77a7cef90007e5319fd28916518c3d9f",
+        "matches": true
+      },
+      {
+        "key": "results/duckdb.json",
+        "bytes": 91794591,
+        "sha256": "15a1d9a408e16da02ed455e7c8979f8b30b3f9df5cf3d58279fafc71fa9d1b83",
+        "expected_sha256": "15a1d9a408e16da02ed455e7c8979f8b30b3f9df5cf3d58279fafc71fa9d1b83",
+        "matches": true
+      },
+      {
+        "key": "results/audit.json",
+        "bytes": 1979,
+        "sha256": "c89689c9d447ad88886727f32779bb695ed08a6442cbebc5e204f6337f604605",
+        "expected_sha256": "c89689c9d447ad88886727f32779bb695ed08a6442cbebc5e204f6337f604605",
+        "matches": true
+      },
+      {
+        "key": "results/mapper_failure.json",
+        "bytes": 200,
+        "sha256": "7beef15d0569b4131a6265767e777296374366d04184e726ff822f0cb25b7f24",
+        "expected_sha256": "7beef15d0569b4131a6265767e777296374366d04184e726ff822f0cb25b7f24",
+        "matches": true
+      },
+      {
+        "key": "results/optimization_benchmark.json",
+        "bytes": 1208,
+        "sha256": "ed96b5bb23f6f5ecf68542885cfa11222f8fc612738e2183bc807f564dbdbd21",
+        "expected_sha256": "ed96b5bb23f6f5ecf68542885cfa11222f8fc612738e2183bc807f564dbdbd21",
+        "matches": true
+      }
+    ]
+  },
   "s3_result_objects": [
     "results/mapreduce_1000.json",
     "results/mapreduce_10000.json",
