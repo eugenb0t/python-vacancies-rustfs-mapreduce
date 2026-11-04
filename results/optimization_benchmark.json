@@ -1,40 +1,16 @@
 {
-  "source": "s3://hh-lake/vacancies_2024.csv.gz",
-  "sample_input_rows": 1000000,
-  "repetitions_per_method": 5,
-  "before": {
-    "method": "title substring or eager normalization/set/sort of every key_skills value",
-    "metrics": {
-      "runs_seconds": [
-        1.910359592999157,
-        1.9544438470002206,
-        1.9230862820004404,
-        1.9768029599981674,
-        1.9960096180002438
-      ],
-      "median_seconds": 1.9544438470002206,
-      "peak_temporary_bytes": 11166,
-      "selected_per_run": [
-        2328,
-        2328,
-        2328,
-        2328,
-        2328
-      ]
-    }
-  },
   "after": {
     "method": "early title check, then direct exact-token scan without per-row set/sort",
     "metrics": {
-      "runs_seconds": [
-        1.578628494997247,
-        1.559616308000841,
-        1.5982180579994747,
-        1.5709962159999122,
-        1.5909294489974855
-      ],
-      "median_seconds": 1.578628494997247,
+      "median_seconds": 1.0196388229996955,
       "peak_temporary_bytes": 6356,
+      "runs_seconds": [
+        0.9896353290005209,
+        0.9289308560000791,
+        1.0616844149990357,
+        1.0196388229996955,
+        1.04414956599976
+      ],
       "selected_per_run": [
         2328,
         2328,
@@ -44,6 +20,31 @@
       ]
     }
   },
+  "before": {
+    "method": "title substring or eager normalization/set/sort of every key_skills value",
+    "metrics": {
+      "median_seconds": 1.257908880001196,
+      "peak_temporary_bytes": 11166,
+      "runs_seconds": [
+        1.2931408479998936,
+        1.2844669960013562,
+        1.242047570000068,
+        1.138678985000297,
+        1.257908880001196
+      ],
+      "selected_per_run": [
+        2328,
+        2328,
+        2328,
+        2328,
+        2328
+      ]
+    }
+  },
+  "repetitions_per_method": 5,
+  "sample_input_rows": 1000000,
   "selected_rows_equal": true,
-  "time_improvement_percent": 23.81
+  "source": "s3://hh-lake/vacancies_2024.csv.gz",
+  "temporary_allocation_reduction_percent": 43.08,
+  "time_improvement_percent": 23.37
 }

@@ -22,8 +22,8 @@
       "chunk_rows": 1000,
       "input_rows": 10205102,
       "python_vacancies": 20033,
-      "elapsed_seconds": 343.804,
-      "peak_rss_kib": 625572,
+      "elapsed_seconds": 225.014,
+      "peak_rss_kib": 625836,
       "unique_counts": {
         "1": 6644,
         "2": 136352,
@@ -39,8 +39,8 @@
       "chunk_rows": 10000,
       "input_rows": 10205102,
       "python_vacancies": 20033,
-      "elapsed_seconds": 359.054,
-      "peak_rss_kib": 698036,
+      "elapsed_seconds": 230.711,
+      "peak_rss_kib": 698804,
       "unique_counts": {
         "1": 6644,
         "2": 136352,
@@ -56,8 +56,8 @@
       "chunk_rows": 100000,
       "input_rows": 10205102,
       "python_vacancies": 20033,
-      "elapsed_seconds": 351.28,
-      "peak_rss_kib": 1571140,
+      "elapsed_seconds": 236.656,
+      "peak_rss_kib": 1564932,
       "unique_counts": {
         "1": 6644,
         "2": 136352,
@@ -72,8 +72,8 @@
   ],
   "duckdb": {
     "python_vacancies": 20033,
-    "elapsed_seconds": 136.485,
-    "peak_rss_kib": 4444960,
+    "elapsed_seconds": 93.824,
+    "peak_rss_kib": 4406556,
     "memory_limit": "4GB",
     "threads": 2,
     "combination_contribution_totals": {
@@ -797,42 +797,18 @@
     "status": "PASS"
   },
   "optimization_benchmark": {
-    "source": "s3://hh-lake/vacancies_2024.csv.gz",
-    "sample_input_rows": 1000000,
-    "repetitions_per_method": 5,
-    "before": {
-      "method": "title substring or eager normalization/set/sort of every key_skills value",
-      "metrics": {
-        "runs_seconds": [
-          1.910359592999157,
-          1.9544438470002206,
-          1.9230862820004404,
-          1.9768029599981674,
-          1.9960096180002438
-        ],
-        "median_seconds": 1.9544438470002206,
-        "peak_temporary_bytes": 11166,
-        "selected_per_run": [
-          2328,
-          2328,
-          2328,
-          2328,
-          2328
-        ]
-      }
-    },
     "after": {
       "method": "early title check, then direct exact-token scan without per-row set/sort",
       "metrics": {
-        "runs_seconds": [
-          1.578628494997247,
-          1.559616308000841,
-          1.5982180579994747,
-          1.5709962159999122,
-          1.5909294489974855
-        ],
-        "median_seconds": 1.578628494997247,
+        "median_seconds": 1.0196388229996955,
         "peak_temporary_bytes": 6356,
+        "runs_seconds": [
+          0.9896353290005209,
+          0.9289308560000791,
+          1.0616844149990357,
+          1.0196388229996955,
+          1.04414956599976
+        ],
         "selected_per_run": [
           2328,
           2328,
@@ -842,9 +818,33 @@
         ]
       }
     },
+    "before": {
+      "method": "title substring or eager normalization/set/sort of every key_skills value",
+      "metrics": {
+        "median_seconds": 1.257908880001196,
+        "peak_temporary_bytes": 11166,
+        "runs_seconds": [
+          1.2931408479998936,
+          1.2844669960013562,
+          1.242047570000068,
+          1.138678985000297,
+          1.257908880001196
+        ],
+        "selected_per_run": [
+          2328,
+          2328,
+          2328,
+          2328,
+          2328
+        ]
+      }
+    },
+    "repetitions_per_method": 5,
+    "sample_input_rows": 1000000,
     "selected_rows_equal": true,
-    "time_improvement_percent": 23.81,
-    "temporary_allocation_reduction_percent": 43.08
+    "source": "s3://hh-lake/vacancies_2024.csv.gz",
+    "temporary_allocation_reduction_percent": 43.08,
+    "time_improvement_percent": 23.37
   },
   "s3_result_objects": [
     "results/mapreduce_1000.json",

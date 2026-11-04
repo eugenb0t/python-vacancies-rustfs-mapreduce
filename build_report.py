@@ -182,11 +182,17 @@ def main():
         story.append(Paragraph(f"Пиковые временные аллокации уменьшились на {optimization['temporary_allocation_reduction_percent']:.1f}% ({before['peak_temporary_bytes']} → {after['peak_temporary_bytes']} байт). Это измерение относится к фильтру поверх уже загруженного набора строк и не выдаётся за снижение RSS полного процесса.", styles["BodyRu"]))
     story.append(Paragraph("Тест отказа mapper: искусственная ошибка должна завершать задачу с ошибкой; частичный результат не публикуется. MapReduce и SQL используют один S3 gzip-объект и единый сегмент; аудит сверяет словари одиночных навыков, пар и троек и число вакансий. В качестве оптимизации локальные счётчики блока редуцируются агрегированно, уменьшая количество операций записи в итоговые глобальные счётчики.", styles["BodyRu"]))
     story.append(Paragraph("Ограничения: RustFS использует восемь каталогов на одном физическом NVMe (учебная конфигурация, без отказоустойчивости к потере диска). Зарплата указана только при валюте RUR, пропуски не импутируются. CSV является снимком 2024 года.", styles["BodyRu"]))
-    for img in (ROOT / "evidence" / "rustfs_buckets.png", ROOT / "evidence" / "rustfs_hh_lake_object.png"):
-        if img.exists():
-            story.extend([PageBreak(), Paragraph(f"Скриншот консоли RustFS: {img.stem.replace('_',' ')}", styles["HeadRu"]), Spacer(1,4*mm)])
-            from reportlab.platypus import Image
-            story.append(Image(str(img), width=170*mm, height=95*mm, kind="proportional"))
+    screenshots = [ROOT / "evidence" / name for name in (
+        "rustfs_buckets.png", "rustfs_hh_lake_object.png", "rustfs_results_objects.png")]
+    screenshots = [img for img in screenshots if img.exists()]
+    if screenshots:
+        story.extend([PageBreak(), Paragraph("Приложение. Проверка RustFS и объектов в hh-lake", styles["HeadRu"])])
+        from reportlab.platypus import Image
+        for img in screenshots:
+            story.append(Paragraph(img.stem.replace("_", " "), styles["SmallCell"]))
+            image = Image(str(img), width=135*mm, height=76*mm, kind="proportional")
+            image.hAlign = "CENTER"
+            story.extend([image, Spacer(1,1.5*mm)])
     doc.build(story)
     print(OUT)
 
