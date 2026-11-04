@@ -51,6 +51,7 @@ def main():
     styles = getSampleStyleSheet()
     styles.add(ParagraphStyle(name="TitleRu", parent=styles["Title"], alignment=TA_CENTER, fontName="DejaVu", fontSize=19, leading=23))
     styles.add(ParagraphStyle(name="BodyRu", parent=styles["BodyText"], fontName="DejaVu", fontSize=9.3, leading=13, spaceAfter=6))
+    styles.add(ParagraphStyle(name="SmallCell", parent=styles["BodyText"], fontName="DejaVu", fontSize=6.5, leading=8, spaceAfter=0))
     styles.add(ParagraphStyle(name="HeadRu", parent=styles["Heading2"], fontName="DejaVu-Bold", fontSize=13, leading=16, spaceBefore=10, spaceAfter=5))
     # Register fonts available on standard Ubuntu installations.
     from reportlab.pdfbase import pdfmetrics
@@ -63,7 +64,7 @@ def main():
         Paragraph("В файле содержится 10 205 102 записи вакансий и строка заголовка. Исходный CSV размером 24 970 431 974 байта не изменялся; gzip-объект в RustFS подтверждён полным чтением и SHA-256.", styles["BodyRu"]),
         Paragraph(f"Объект: {ingest['object']['uri']} · {ingest['object']['bytes']:,} байт · SHA-256 {ingest['object']['sha256']} · исходный CSV SHA-256 {ingest['source']['sha256']}.".replace(",", " "), styles["BodyRu"]),
         Paragraph("Вариант и правило выборки", styles["HeadRu"]),
-        Paragraph("Вариант: Python. В сегмент включена строка, если название name содержит python без учёта регистра либо отдельный токен python присутствует в списке key_skills, разделённом точкой с запятой. Описание вакансии не анализировалось. Навыки нормализованы в нижний регистр, повторы внутри строки удалены; пары и тройки — неупорядоченные сочетания.", styles["BodyRu"]),
+        Paragraph("Вариант: Python. В учебном чате более точный предикат отбора не задан, поэтому для воспроизводимости используется явное правило: строка включается, если название name содержит python без учёта регистра либо отдельный токен python присутствует в списке key_skills, разделённом точкой с запятой. Описание вакансии не анализировалось. Навыки нормализованы в нижний регистр, повторы внутри строки удалены; пары и тройки — неупорядоченные сочетания.", styles["BodyRu"]),
         Paragraph("Результаты обработки", styles["HeadRu"]) ]
     if not mr:
         story.extend([Paragraph("Статус на момент сборки: подтверждена загрузка и целостность исходного набора, опубликован воспроизводимый код MapReduce и DuckDB, выполнены два unit-теста и тест искусственного отказа mapper. Полный аналитический проход по 10,2 млн строк и сверка двух движков ещё выполняются; численные аналитические выводы здесь намеренно не приводятся.", styles["BodyRu"]),
@@ -124,11 +125,12 @@ def main():
     if sql:
         for label, key in (("Наибольший рост медианы", "top_salary_increases"), ("Наибольшее снижение медианы", "top_salary_decreases")):
             story.append(Paragraph(label, styles["BodyRu"]))
-            si = [["Сочетание", "N", "Медиана ₽", "База навыка", "Δ"]]
+            si = [[Paragraph(x,styles["SmallCell"]) for x in ("Сочетание", "N", "Медиана ₽", "База навыка", "Δ")]]
             for x in sql.get(key, []):
-                si.append([x["combo"], str(x["vacancies"]), f"{x['median_salary_rur']:,.0f}".replace(","," ") if x["median_salary_rur"] else "н/д", x.get("baseline_skill_by_segment_frequency") or "н/д", f"{x['premium_percent']:+.1f}%" if x["premium_percent"] is not None else "н/д"])
-            st = Table(si, colWidths=[57*mm,16*mm,31*mm,48*mm,20*mm], repeatRows=1)
-            st.setStyle(TableStyle([("FONTNAME",(0,0),(-1,-1),"DejaVu"),("BACKGROUND",(0,0),(-1,0),colors.HexColor("#dce7ef")),("GRID",(0,0),(-1,-1),0.25,colors.grey),("FONTSIZE",(0,0),(-1,-1),6.5),("PADDING",(0,0),(-1,-1),3)]))
+                vals = [x["combo"], str(x["vacancies"]), f"{x['median_salary_rur']:,.0f}".replace(","," ") if x["median_salary_rur"] else "н/д", x.get("baseline_skill_by_segment_frequency") or "н/д", f"{x['premium_percent']:+.1f}%" if x["premium_percent"] is not None else "н/д"]
+                si.append([Paragraph(str(v),styles["SmallCell"]) for v in vals])
+            st = Table(si, colWidths=[65*mm,13*mm,28*mm,44*mm,22*mm], repeatRows=1)
+            st.setStyle(TableStyle([("BACKGROUND",(0,0),(-1,0),colors.HexColor("#dce7ef")),("GRID",(0,0),(-1,-1),0.25,colors.grey),("VALIGN",(0,0),(-1,-1),"TOP"),("PADDING",(0,0),(-1,-1),3)]))
             story.append(st)
     story.append(Paragraph("Производительность и контроль", styles["HeadRu"]))
     profiles = []
@@ -149,8 +151,8 @@ def main():
         inc = next((x for x in sql["top_salary_increases"] if x["combo"] == "asyncio + python"), sql["top_salary_increases"][0])
         dec = next((x for x in sql["top_salary_decreases"] if x["combo"] == "gimp + python"), sql["top_salary_decreases"][0])
         story.append(Paragraph(f"Интерпретация эффекта: `asyncio + python` — медиана {inc['median_salary_rur']:,.0f} ₽ против {inc['baseline_median_salary_rur']:,.0f} ₽ у более частого базового навыка {inc['baseline_skill_by_segment_frequency']} ({inc['premium_percent']:+.1f}%, {inc['salary_observations']} зарплатных наблюдений). Для `gimp + python` медиана {dec['median_salary_rur']:,.0f} ₽ против {dec['baseline_median_salary_rur']:,.0f} ₽ у {dec['baseline_skill_by_segment_frequency']} ({dec['premium_percent']:+.1f}%, {dec['salary_observations']} наблюдений). Снижение, вероятно, отражает иной состав ролей и зарплатных объявлений, а не причинное влияние навыка.", styles["BodyRu"]))
-    # Concise literal run outputs make the report auditable without embedding 79-MB counters.
-    output_rows = [["Команда", "Фрагмент фактического вывода"]]
+    # Summarize persisted JSON results; this is not a verbatim terminal transcript.
+    output_rows = [["Запуск", "Краткая сводка сохранённого результата"]]
     for path in sorted(RESULTS.glob("mapreduce_*.json")):
         d = json.loads(path.read_text(encoding="utf-8"))
         output_rows.append([f"mr --chunk-rows {d['chunk_rows']}",
@@ -163,7 +165,7 @@ def main():
         output_rows.append(["fail-test",f"{failure['status']}; injected error; partial result published=false"])
     if optimization:
         output_rows.append(["benchmark_filter",f"1,000,000 строк; {optimization['time_improvement_percent']:+.2f}% времени; выбранные строки равны"])
-    story.extend([Paragraph("Выводы команд (сокращённый stdout)", styles["HeadRu"])])
+    story.extend([Paragraph("Сводка результатов запусков (по сохранённым JSON; полный stdout не сохранялся)", styles["HeadRu"])])
     ot = Table([[Paragraph(str(v), styles["BodyRu"]) for v in row] for row in output_rows], colWidths=[46*mm,126*mm], repeatRows=1)
     ot.setStyle(TableStyle([("FONTNAME",(0,0),(-1,-1),"DejaVu"),("BACKGROUND",(0,0),(-1,0),colors.HexColor("#dce7ef")),("GRID",(0,0),(-1,-1),0.25,colors.grey),("FONTSIZE",(0,0),(-1,-1),7),("VALIGN",(0,0),(-1,-1),"TOP"),("PADDING",(0,0),(-1,-1),4)]))
     story.append(ot)
